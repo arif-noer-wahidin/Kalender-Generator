@@ -28,6 +28,8 @@ const MONTH_NAMES = [
   "Juli", "Agustus", "September", "Oktober", "November", "Desember"
 ];
 
+const PROMO_URL = "https://s.shopee.co.id/7VAKYl029R";
+
 const ControlPanel: React.FC<ControlPanelProps> = ({ config, setConfig, currentMonth, currentYear, onMonthChange, onYearChange, onGenerateAIBackground, onGenerateYear, onRemoveImage, onUploadImage, isGeneratingAI, generationProgress, quote, onQuoteChange, onDownloadFull, isDownloadingFull, onCloseMobile }) => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [directUrl, setDirectUrl] = useState('');
@@ -38,6 +40,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ config, setConfig, currentM
   };
 
   const handleDownloadSinglePDF = async () => {
+    // Open promo link first
+    window.open(PROMO_URL, '_blank');
+
     const element = document.querySelector('.calendar-card') as HTMLElement;
     if (!element) {
         alert("Element kalender tidak ditemukan.");
@@ -116,7 +121,10 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ config, setConfig, currentM
         {/* Main Actions */}
         <div className="space-y-3">
             <button 
-                onClick={onDownloadFull}
+                onClick={() => {
+                    window.open(PROMO_URL, '_blank');
+                    onDownloadFull();
+                }}
                 disabled={isDownloadingFull || isDownloadingSingle || config.layout === 'fullyear'}
                 className={`w-full flex items-center justify-between gap-2 py-3 px-4 rounded-xl transition-all shadow-md text-sm font-bold transform hover:-translate-y-0.5 active:translate-y-0 ${isDownloadingFull || config.layout === 'fullyear' ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' : 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-emerald-200'}`}
             >

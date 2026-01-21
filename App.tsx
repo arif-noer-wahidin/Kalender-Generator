@@ -41,7 +41,7 @@ const DEFAULT_CONFIG: CalendarConfig = {
   borderRadius: 0,
   gridGap: 0,
   shadowIntensity: 0,
-  fontScale: 0.85
+  fontScale: 0.80
 };
 
 const MONTHLY_THEMES = [
