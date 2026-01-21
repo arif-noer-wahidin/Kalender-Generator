@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- SEO Optimization: Primary Keywords -->
+    <title>Kalender Lengkap - Generator Kalender Indonesia Hijriyah & Jawa</title>
+    <meta name="description" content="Buat dan download kalender lengkap dengan tanggal merah, libur nasional, penanggalan Hijriyah dan Jawa (Weton). Generator kalender kustom gratis siap cetak PDF." />
+    <meta name="keywords" content="kalender online, kalender lengkap, kalender tanggal merah, kalender hijriyah jawa, libur nasional, buat kalender pdf, cetak kalender" />
+    
+    <!-- Open Graph for Social Media -->
+    <meta property="og:title" content="Kalender Lengkap - Generator Kalender Kustom Gratis" />
+    <meta property="og:description" content="Generator kalender otomatis dengan tanggal merah, libur nasional, Hijriyah, dan Jawa. Download PDF gratis." />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="id_ID" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              serif: ['Playfair Display', 'serif'],
+              mono: ['Roboto Mono', 'monospace'],
+            },
+            screens: {
+              'print': {'raw': 'print'},
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* Kita tetap biarkan style print sebagai fallback jika user menekan Ctrl+P */
+      @media print {
+        @page { margin: 0; size: auto; }
+        body * { visibility: hidden; }
+        html, body, #root, .app-container, .calendar-wrapper {
+          background-color: transparent !important;
+          height: auto !important;
+          width: auto !important;
+          overflow: visible !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        .calendar-card, .calendar-card * { visibility: visible !important; }
+        .calendar-card {
+          position: fixed !important;
+          top: 0 !important; left: 0 !important;
+          margin: 0 !important; padding: 0 !important;
+          z-index: 9999 !important;
+          width: 100% !important; max-width: 100% !important; height: 100% !important;
+          box-shadow: none !important; border-radius: 0 !important;
+          -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+        }
+        .print\:hidden { display: none !important; }
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "html2canvas": "https://esm.sh/html2canvas@1.4.1",
+    "jspdf": "https://esm.sh/jspdf@2.5.1"
+  }
+}
+</script>
+</head>
+  <body class="bg-gray-50 text-gray-900">
+    <div id="root"></div>
+  </body>
+</html>
