@@ -8,29 +8,62 @@ export const generateSinglePDF = async (
   monthName: string, 
   year: number
 ): Promise<void> => {
-    const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: config.bgColor,
-        logging: false
-    });
-
-    const imgData = canvas.toDataURL('image/jpeg', 0.9);
-    const pdf = new jsPDF({
-        orientation: config.orientation,
-        unit: 'mm',
-        format: 'a4'
-    });
-
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+    // 1. Clone elemen agar tidak mengganggu tampilan asli
+    const clone = element.cloneNode(true) as HTMLElement;
     
-    const fileName = `Kalender_${config.layout === 'fullyear' ? 'Full' : monthName}_${year}.pdf`;
-    pdf.save(fileName);
+    // 2. Reset transformasi (scale) pada clone agar ukurannya murni A4 (794px / 1123px)
+    clone.style.transform = 'none';
+    clone.style.position = 'fixed';
+    clone.style.top = '0';
+    clone.style.left = '0';
+    clone.style.zIndex = '-9999';
+    clone.style.margin = '0';
+    
+    // Paksa ukuran sesuai config pixel A4
+    clone.style.width = element.style.width;
+    clone.style.height = element.style.height;
+
+    document.body.appendChild(clone);
+
+    // Tunggu sebentar agar font/gambar di clone merender sempurna
+    await new Promise(r => setTimeout(r, 100));
+
+    try {
+        const canvas = await html2canvas(clone, {
+            scale: 2, // Kualitas tinggi
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: config.bgColor,
+            logging: false,
+            windowWidth: clone.scrollWidth,
+            windowHeight: clone.scrollHeight
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.9);
+        const pdf = new jsPDF({
+            orientation: config.orientation,
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        
+        const fileName = `Kalender_${config.layout === 'fullyear' ? 'Full' : monthName}_${year}.pdf`;
+        pdf.save(fileName);
+
+    } catch (error) {
+        console.error("PDF Generation Error:", error);
+        throw error;
+    } finally {
+        // 3. Hapus clone
+        if (document.body.contains(clone)) {
+            document.body.removeChild(clone);
+        }
+    }
 };
 
 export const generateFullYearPDF = async (
@@ -55,27 +88,45 @@ export const generateFullYearPDF = async (
         
         if (!card) continue;
 
-        const canvas = await html2canvas(card, {
-            scale: 2, 
-            useCORS: true,
-            allowTaint: true, 
-            backgroundColor: config.bgColor,
-            logging: false,
-            windowWidth: card.scrollWidth,
-            windowHeight: card.scrollHeight,
-            x: 0,
-            y: 0
-        });
+        // Clone setiap halaman
+        const clone = card.cloneNode(true) as HTMLElement;
+        clone.style.transform = 'none';
+        clone.style.position = 'fixed';
+        clone.style.top = '0';
+        clone.style.left = '0';
+        clone.style.zIndex = '-9999';
+        clone.style.width = card.style.width;
+        clone.style.height = card.style.height;
 
-        const imgData = canvas.toDataURL('image/jpeg', 0.85);
+        document.body.appendChild(clone);
         
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        // Wait for rendering
+        await new Promise(r => setTimeout(r, 50));
 
-        if (i > 0) pdf.addPage();
-        
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        try {
+            const canvas = await html2canvas(clone, {
+                scale: 2, 
+                useCORS: true,
+                allowTaint: true, 
+                backgroundColor: config.bgColor,
+                logging: false,
+                windowWidth: clone.scrollWidth,
+                windowHeight: clone.scrollHeight
+            });
+
+            const imgData = canvas.toDataURL('image/jpeg', 0.85);
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            if (i > 0) pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+
+        } finally {
+            if (document.body.contains(clone)) {
+                document.body.removeChild(clone);
+            }
+        }
     }
 
     pdf.save(`Kalender_Lengkap_${year}.pdf`);
