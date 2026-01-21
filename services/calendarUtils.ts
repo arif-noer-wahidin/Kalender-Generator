@@ -14,7 +14,6 @@ export const getJavanesePasaran = (date: Date): string => {
   const diffTime = d.getTime() - ref.getTime();
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   
-  // Modulo in JS can return negative for negative numbers, handle that
   let index = (REF_PASARAN_INDEX + diffDays) % 5;
   if (index < 0) index += 5;
   
@@ -43,83 +42,67 @@ export const getChineseDate = (date: Date): string => {
   }
 };
 
-// Simplified fixed holidays for Indonesia (Demo purposes - accurate calculation requires complex libraries)
+// Simplified fixed holidays for Indonesia
+// NOTE: Accurate religious holidays (Eid, Nyepi, Vesak, Easter) require 
+// complex astronomical calculations or an external API which is beyond this static demo scope.
 const getHoliday = (date: Date): string | undefined => {
-  const month = date.getMonth();
+  const month = date.getMonth(); // 0-indexed
   const day = date.getDate();
-  const year = date.getFullYear();
 
-  // Fixed Dates
-  if (month === 0 && day === 1) return "Tahun Baru Masehi";
-  if (month === 4 && day === 1) return "Hari Buruh";
-  if (month === 5 && day === 1) return "Hari Lahir Pancasila";
-  if (month === 7 && day === 17) return "HUT RI";
-  if (month === 11 && day === 25) return "Hari Natal";
+  const holidays: Record<string, string> = {
+    "0-1": "Tahun Baru Masehi",
+    "4-1": "Hari Buruh Internasional",
+    "5-1": "Hari Lahir Pancasila",
+    "7-17": "Hari Kemerdekaan RI",
+    "11-25": "Hari Raya Natal"
+  };
 
-  // Note: Movable holidays (Eid, Vesak, Nyepi, Easter) require complex calc or API.
-  // We will leave them blank or handle basic logic if needed, but for this demo, we focus on the structure.
-  
-  return undefined;
+  const key = `${month}-${day}`;
+  return holidays[key];
 };
 
 export const generateCalendarGrid = (year: number, month: number): DayData[] => {
   const firstDayOfMonth = new Date(year, month, 1);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  
   const startDayOfWeek = firstDayOfMonth.getDay(); // 0 = Sunday
   
   const days: DayData[] = [];
+  const today = new Date();
   
   // Previous month padding
   const prevMonthDays = new Date(year, month, 0).getDate();
   for (let i = startDayOfWeek - 1; i >= 0; i--) {
     const d = new Date(year, month - 1, prevMonthDays - i);
-    days.push({
-      date: d,
-      isCurrentMonth: false,
-      isToday: false,
-      dayOfMonth: d.getDate(),
-      hijriDate: getHijriDate(d),
-      javaneseDate: getJavanesePasaran(d),
-      chineseDate: getChineseDate(d),
-      holiday: getHoliday(d),
-      isWeekend: d.getDay() === 0 || d.getDay() === 6
-    });
+    days.push(createDayData(d, false, today));
   }
   
   // Current month
-  const today = new Date();
   for (let i = 1; i <= daysInMonth; i++) {
     const d = new Date(year, month, i);
-    days.push({
-      date: d,
-      isCurrentMonth: true,
-      isToday: d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear(),
-      dayOfMonth: i,
-      hijriDate: getHijriDate(d),
-      javaneseDate: getJavanesePasaran(d),
-      chineseDate: getChineseDate(d),
-      holiday: getHoliday(d),
-      isWeekend: d.getDay() === 0 || d.getDay() === 6
-    });
+    days.push(createDayData(d, true, today));
   }
   
-  // Next month padding to complete 42 cells (6 rows) or just 35 (5 rows)
+  // Next month padding
   const remainingCells = 42 - days.length;
   for (let i = 1; i <= remainingCells; i++) {
     const d = new Date(year, month + 1, i);
-    days.push({
-      date: d,
-      isCurrentMonth: false,
-      isToday: false,
-      dayOfMonth: i,
-      hijriDate: getHijriDate(d),
-      javaneseDate: getJavanesePasaran(d),
-      chineseDate: getChineseDate(d),
-      holiday: getHoliday(d),
-      isWeekend: d.getDay() === 0 || d.getDay() === 6
-    });
+    days.push(createDayData(d, false, today));
   }
   
   return days;
+};
+
+// Helper to keep code DRY
+const createDayData = (d: Date, isCurrentMonth: boolean, today: Date): DayData => {
+  return {
+    date: d,
+    isCurrentMonth,
+    isToday: d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear(),
+    dayOfMonth: d.getDate(),
+    hijriDate: getHijriDate(d),
+    javaneseDate: getJavanesePasaran(d),
+    chineseDate: getChineseDate(d),
+    holiday: getHoliday(d),
+    isWeekend: d.getDay() === 0 || d.getDay() === 6
+  };
 };
