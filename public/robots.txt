@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+
+# Explicitly confirm access for common AI bots (though * covers them)
+User-agent: GPTBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
